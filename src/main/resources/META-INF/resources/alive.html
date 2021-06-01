@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Quarkus World Tour - Rock Rock Rock</title>
+    <!-- Semantic UI -->
+    <link rel="stylesheet" href="semantic-ui/semantic.min.css"/>
+    <link rel="stylesheet" href="css/main.css"/>
+    <script src="js/jquery-3.1.1.min.js"></script>
+    <script src="semantic-ui/semantic.min.js"></script>
+    <!-- Load AngularJS -->
+    <script src="js/angular.min.js"></script>
+    <script type="text/javascript">
+      var app = angular.module("RockBandManagement", []);
+
+      //Controller Part
+      app.controller("RockBandManagementController", ['$scope', '$http', '$httpParamSerializerJQLike', function ($scope, $http, $httpParamSerializerJQLike) {
+
+        // initialize page with default data which is blank in this example
+        $scope.bands = [];
+        $scope.pattern = '';
+        $scope.form = {};
+
+        // initializes the data from the REST endpoint
+        _refreshPageData();
+        $('.bands').show();
+        _clearForm();
+
+        $scope.refresh = function () {
+            _refreshPageData();
+        }
+
+        $scope.showAddBandModal = function () {
+            $('#modal-band').modal('show');
+        }
+
+        $scope.addBand = function () {
+            $http({
+                method: 'POST',
+                url: '/rock',
+                data: angular.toJson($scope.form.band),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(_success, _error);
+        }
+
+        function _refreshPageData() {
+            $http({
+                method: 'GET',
+                url: '/rock/alive'
+            }).then(function successCallback(response) {
+                $scope.bands = response.data;
+            }, function errorCallback(response) {
+                console.log(response.statusText);
+            });
+        }
+
+        function _success(response) {
+            $scope.pattern = '';
+            _refreshPageData();
+            _clearForm();
+        }
+
+        function _clearForm() {
+            $scope.form.band = {
+                name: '',
+                creationYear: '',
+                terminationYear: '',
+                alive: true
+            };
+        }
+
+        function _error(response) {
+            alert(response.data.message || response.statusText);
+            _clearForm();
+        }
+      }]);
+    </script>
+</head>
+<body ng-app="RockBandManagement" ng-controller="RockBandManagementController">
+    <div class="ui fixed inverted menu main-menu">
+        <a class="header item" href="/">
+            <img class="ui logo" src="images/homepage_herocallout_worldtour.png" alt="Quarkus logo" width="103" height="50">
+        </a>
+        <a class="header item" href="/">
+            All
+        </a>
+        <a class="header item" href="/alive.html">
+            Alive
+        </a>
+        <a class="header item" href="/search.html">
+            Search
+        </a>
+    </div>
+    <div class="main-content">
+        <div class="ui container bands" style="display:none;">
+            <div class="ui cards">
+                <div class="card" ng-repeat="band in bands">
+                    <div class="content">
+                        <div class="header">{{ band.name }}  <i class="icon music green" ng-if="band.alive"></i></div>
+                        <div class="description">
+                            From {{ band.creationYear }}{{ band.terminationYear ? ' to ' + band.terminationYear : ''}}
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="content">
+                        <button class="ui blue labeled icon button" ng-click="showAddBandModal()"><i class="plus circle icon"></i> Add band</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="ui modal" id="modal-band">
+        <i class="close icon"></i>
+        <div class="header">
+            Add band
+        </div>
+        <div class="content">
+            <div class="description">
+                <form class="ui form" id="band-form">
+                    <div class="required field">
+                        <label>Name</label>
+                        <input type="text" name="name" placeholder="Name" ng-model="form.band.name" required>
+                    </div>
+                    <div class="required field">
+                        <label>Creation year</label>
+                        <input type="text" name="creationYear" placeholder="Creation year" ng-model="form.band.creationYear" required>
+                    </div>
+                    <div class="field">
+                        <label>Termination year</label>
+                        <input type="text" name="terminationYear" placeholder="Termination year" ng-model="form.band.terminationYear">
+                    </div>
+                    <div class="field">
+                        <label>Alive</label>
+                        <input type="checkbox" name="alive" ng-model="form.band.alive">
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="actions">
+            <button type="submit" class="ui positive right labeled icon button" form="band-form" ng-click="addBand()">
+                <i class="checkmark icon"></i>
+                Submit
+            </button>
+        </div>
+    </div>
+</body>
+</html>
