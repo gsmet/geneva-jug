@@ -1,50 +1,79 @@
-# rock-rock-rock project
+# Geneva JUG Quarkus demo - June 2021
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+## Branches
 
-If you want to learn more about Quarkus, please visit its website: https://quarkus.io/ .
+This repository contains two branches:
 
-## Running the application in dev mode
+- `main` (<- you are here) - Persistence demo with Hibernate ORM, Hibernate Search, Micrometer and a health check
+- [`reactive`](https://github.com/gsmet/geneva-jug/tree/reactive) - A branch where Clément switched the initial step to reactive
 
-You can run your application in dev mode that enables live coding using:
+## Main branch
+
+### Starting the containers
+
+First, start your containers
+
+PostgreSQL:
+
+```
+docker run --ulimit memlock=-1:-1 -it --rm=true --memory-swappiness=0 --name postgresql_quarkus_test -e POSTGRES_USER=quarkus_test -e POSTGRES_PASSWORD=quarkus_test -e POSTGRES_DB=quarkus_test -p 5432:5432 postgres:13.2
+```
+
+Elasticsearch:
+
+```
+docker run -it --rm=true --name elasticsearch_quarkus_test -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+```
+
+### Experimenting with dev mode
+
+Then you can start your application in dev mode:
+
 ```shell script
 ./mvnw compile quarkus:dev
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
+Some data will automatically be imported in the database but... we haven't coded anything to index the data in Elasticsearch automatically
+(if you are interested, you can see how it can be done in this other demo: https://github.com/gsmet/hibernate-search-demo/blob/master/src/main/java/org/acme/hibernate/search/demo/LibraryResource.java#L31-L41).
 
-## Packaging and running the application
+You can connect to the Dev UI to trigger a reindex:
 
-The application can be packaged using:
+- Go to http://localhost:8080/q/dev/
+- Click on `Indexed entity types` in the Hibernate Search card
+- Select the entity type and click `Reindex Entities`
+
+Now, you're all set and all the features at http://localhost:8080/ are working..
+
+### Package the application
+
+You can package the application as a jar with:
+
 ```shell script
-./mvnw package
-```
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
-
-If you want to build an _über-jar_, execute the following command:
-```shell script
-./mvnw package -Dquarkus.package.type=uber-jar
-```
-
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
-
-## Creating a native executable
-
-You can create a native executable using: 
-```shell script
-./mvnw package -Pnative
+./mvnw clean package
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using: 
+And start it with:
+
 ```shell script
-./mvnw package -Pnative -Dquarkus.native.container-build=true
+java -jar target/quarkus-app/quarkus-run.jar
 ```
 
-You can then execute your native executable with: `./target/rock-rock-rock-1.0.0-SNAPSHOT-runner`
+> Note that the full application is the entire `target/quarkus-app/` directory.
 
-If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.html.
+You have some example Dockerfiles in `src/main/docker`.
 
-## Related guides
+### Going native
 
+You can stop the app and compile to native with:
 
+```shell script
+./mvnw clean install -Dnative
+```
+
+Now you can grab some coffee.
+
+And, once it's done, start the native executable with:
+
+```shell script
+./target/rock-rock-rock-1.0.0-SNAPSHOT-runner
+```
