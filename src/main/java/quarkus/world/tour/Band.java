@@ -1,5 +1,8 @@
 package quarkus.world.tour;
 
+import io.quarkus.hibernate.reactive.panache.PanacheEntity;
+import io.smallrye.mutiny.Multi;
+
 import java.util.List;
 
 import javax.persistence.Column;
@@ -7,7 +10,6 @@ import javax.persistence.Entity;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
 
 @Entity
 public class Band extends PanacheEntity {
@@ -23,7 +25,7 @@ public class Band extends PanacheEntity {
 
     public Integer terminationYear;
 
-    public static List<Band> listAlive() {
-        return Band.list("alive", true);
+    public static Multi<Band> streamAlive() {
+        return Band.stream("alive", true);
     }
 }
