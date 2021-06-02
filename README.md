@@ -34,7 +34,7 @@ Then you can start your application in dev mode:
 ```
 
 Some data will automatically be imported in the database but... we haven't coded anything to index the data in Elasticsearch automatically
-(if you are interested, you can see how it can be done in this other demo: https://github.com/gsmet/hibernate-search-demo/blob/master/src/main/java/org/acme/hibernate/search/demo/LibraryResource.java#L31-L41).
+(if you are interested, you can see how it can be done in this other demo: https://github.com/gsmet/hibernate-search-demo/blob/master/src/main/java/org/acme/hibernate/search/demo/LibraryResource.java#L31-L41, the model is also slightly more complicated in this other demo).
 
 You can connect to the Dev UI to trigger a reindex:
 
